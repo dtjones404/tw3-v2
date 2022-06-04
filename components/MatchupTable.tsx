@@ -9,7 +9,6 @@ import {
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { dummyWinrates } from '../constants/dummyData';
-import { factionList } from '../constants/factionList';
 import { Faction, IFactionData } from '../constants/types';
 import { convertToTitleCase } from '../util/convertToTitleCase';
 
@@ -17,24 +16,23 @@ const styles = {
   container:
     'overflow-scroll h-[50vh] w-[80vw] mx-auto shadow-xl border-2 rounded-t',
   table: 'block w-fit text-center rounded-t',
-  thead: 'block sticky top-0 rounded-t',
+  thead: 'block sticky top-0 rounded-t z-10',
   tbody: 'block',
   tr: 'block flex',
-  th: 'block rounded-t text-rose-500 text-center w-[150px] border border-black flex-shrink-0 bg-white select-none cursor-pointer',
+  th: 'block rounded-t text-black text-center w-[150px] border border-black flex-shrink-0 bg-white select-none cursor-pointer',
   rowHeader:
     'block text-center w-[150px] sticky left-0 border border-black flex-shrink-0 bg-white justify-self-start select-none cursor-pointer',
-  td: 'block text-white border border-black w-[150px] flex-shrink-0',
+  td: 'block border border-black w-[150px] flex-shrink-0',
 };
 
 const winrateToCellColor = [
-  [0.43, 'bg-rose-600'],
-  [0.45, 'bg-rose-500'],
-  [0.47, 'bg-rose-400'],
-  [0.49, 'bg-amber-500'],
-  [0.51, 'bg-yellow-500'],
-  [0.53, 'bg-lime-400'],
-  [0.55, 'bg-lime-500'],
-  [1, 'bg-lime-600'],
+  [0.45, 'bg-[#f43f5e]'],
+  [0.47, 'bg-[#ea5b48]'],
+  [0.49, 'bg-[#f6ac48]'],
+  [0.51, 'bg-[#fde047]'],
+  [0.53, 'bg-[#dee240]'],
+  [0.55, 'bg-[#c0e43a]'],
+  [1, 'bg-[#a3e635]'],
 ];
 
 const getCellColor = (s: string) => {
@@ -48,24 +46,41 @@ const table = createTable().setRowType<IFactionData>().setOptions({
   enableSortingRemoval: false,
 });
 
-const columnDefs = [
-  table.createDataColumn((row) => convertToTitleCase(row.name), {
-    id: 'name',
-    cell: (info) => info.getValue(),
-    header: '',
-  }),
-  ...factionList.map((name) =>
-    table.createDataColumn((row) => row.matchups[name], {
-      id: name,
-      header: convertToTitleCase(name),
-      cell: (info) => info.getValue().toFixed(3),
-    })
-  ),
-];
+const getColumnDefs = (factionData: IFactionData[]) => {
+  const totalGamesPlayed = factionData.reduce(
+    (tot, faction) => tot + faction.gamesPlayed,
+    0
+  );
+  return [
+    table.createDataColumn((row) => convertToTitleCase(row.name), {
+      id: 'name',
+      cell: (info) => info.getValue(),
+      header: '',
+      footer: 'Playrate',
+    }),
+    ...factionData.map(({ name, gamesPlayed }) =>
+      table.createDataColumn((row) => row.matchups[name], {
+        id: name,
+        header: convertToTitleCase(name),
+        cell: (info) => info.getValue().toFixed(3),
+        footer: (gamesPlayed / totalGamesPlayed).toFixed(3),
+      })
+    ),
+    table.createDataColumn(
+      (row) => (row.gamesWon / row.gamesPlayed).toFixed(3),
+      {
+        id: 'overallWinrate',
+        cell: (info) => info.getValue(),
+        header: 'Overall Winrate',
+        footer: '',
+      }
+    ),
+  ];
+};
 
 export default function MatchupTable() {
   const [data, setData] = useState(dummyWinrates);
-  const [columns, setColumns] = useState([...columnDefs]);
+  const [columns, setColumns] = useState([...getColumnDefs(data)]);
   const [rowSorting, setRowSorting] = useState<SortingState>([]);
   const [colSorting, setColSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
@@ -82,12 +97,22 @@ export default function MatchupTable() {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const handleRowClick = (id: Faction) => {
+  const handleRowClick = (id: Faction | 'gamesPlayed') => {
+    const compareColumns = (
+      f1: IFactionData,
+      f2: IFactionData,
+      desc: boolean
+    ) => {
+      if (id === 'gamesPlayed')
+        return (desc ? 1 : -1) * (f1.gamesPlayed - f2.gamesPlayed);
+      else return (desc ? -1 : 1) * (f1.matchups[id] - f2.matchups[id]);
+    };
+
     if (!colSorting.length || colSorting[0].id !== id) {
       setColSorting([{ id, desc: false }]);
       const sortedCols = data
         .slice()
-        .sort((f1, f2) => f1.matchups[id] - f2.matchups[id]);
+        .sort((f1, f2) => compareColumns(f1, f2, false));
       instance.setColumnOrder([
         'name',
         ...sortedCols.map((faction) => faction.name),
@@ -96,11 +121,7 @@ export default function MatchupTable() {
       setColSorting((oldState) => {
         const sortedCols = data
           .slice()
-          .sort(
-            (f1, f2) =>
-              (colSorting[0].desc ? 1 : -1) *
-              (f1.matchups[id] - f2.matchups[id])
-          );
+          .sort((f1, f2) => compareColumns(f1, f2, !oldState[0].desc));
         instance.setColumnOrder([
           'name',
           ...sortedCols.map((faction) => faction.name),
@@ -117,22 +138,24 @@ export default function MatchupTable() {
           <tr className={styles.tr}>
             {instance.getHeaderGroups()[0].headers.map((header) => (
               <th
-                className={styles.th}
+                className={`${styles.th} ${
+                  header.id === 'name' ? 'sticky top-0 left-0 z-10' : ''
+                }`}
                 key={header.id}
                 colSpan={header.colSpan}
                 onClick={header.column.getToggleSortingHandler()}
               >
-                {header.id !== 'name' ? (
-                  <div className="flex flex-col justify-center items-center">
-                    {header.isPlaceholder ? null : header.renderHeader()}
+                <div className="flex flex-col justify-center items-center">
+                  {header.isPlaceholder ? null : header.renderHeader()}
+                  {!['name', 'overallWinrate'].includes(header.id) ? (
                     <Image
                       src={`/logos/${header.id}.webp`}
                       alt={`${header.id} faction logo`}
                       width={40}
                       height={40}
                     />
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </th>
             ))}
           </tr>
@@ -162,6 +185,28 @@ export default function MatchupTable() {
             </tr>
           ))}
         </tbody>
+        <tfoot className="block sticky bottom-0 z-10">
+          <tr className={styles.tr}>
+            {instance.getFooterGroups()[0].headers.map((header) => {
+              if (header.id === 'name') {
+                return (
+                  <th
+                    className={`${styles.th} sticky left-0 z-10`}
+                    key={header.id}
+                    onClick={() => handleRowClick('gamesPlayed')}
+                  >
+                    {header.renderFooter()}
+                  </th>
+                );
+              } else
+                return (
+                  <td className={styles.th} key={header.id}>
+                    {header.renderFooter()}
+                  </td>
+                );
+            })}
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

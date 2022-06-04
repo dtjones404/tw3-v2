@@ -9,7 +9,7 @@ interface INavbarProps {
 
 export default function Navbar({ brand, brandIcon, links }: INavbarProps) {
   const router = useRouter();
-  console.log(router.pathname);
+
   return (
     <nav className="mb-8 border-b-2 px-6 py-2.5 bg-white shadow-lg rounded-lg">
       <div className="container mx-auto">
