@@ -1,3 +1,4 @@
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -9,7 +10,7 @@ interface INavbarProps {
 
 export default function Navbar({ brand, brandIcon, links }: INavbarProps) {
   const router = useRouter();
-
+  const { data: session } = useSession();
   return (
     <nav className="mb-8 border-b-2 px-6 py-2.5 bg-white shadow-lg rounded-lg">
       <div className="container mx-auto">
@@ -39,6 +40,15 @@ export default function Navbar({ brand, brandIcon, links }: INavbarProps) {
               </Link>
             </li>
           ))}
+          {!session ? (
+            <li>
+              <button onClick={() => signIn()}>Sign in</button>
+            </li>
+          ) : (
+            <li>
+              <button onClick={() => signOut()}>Sign out</button>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

@@ -200,7 +200,7 @@ export default function MatchupTable() {
                 );
               } else
                 return (
-                  <td className={styles.th} key={header.id}>
+                  <td className={styles.td} key={header.id}>
                     {header.renderFooter()}
                   </td>
                 );
