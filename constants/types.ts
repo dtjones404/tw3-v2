@@ -1,31 +1,36 @@
-export interface IFaction {
-  name: string;
-  displayName: string;
+import { factionList } from './factionList';
+
+export interface IFactionData {
+  name: Faction;
+  gamesPlayed: number;
+  gamesWon: number;
   matchups: IMatchups;
 }
 
 export interface IMatchups {
-  vsEmpire: number;
-  vsDwarfs: number;
-  vsVampireCounts: number;
-  vsGreenskins: number;
-  vsWarriorsOfChaos: number;
-  vsBretonnia: number;
-  vsBeastmen: number;
-  vsWoodElves: number;
-  vsNorsca: number;
-  vsHighElves: number;
-  vsDarkElves: number;
-  vsLizardmen: number;
-  vsSkaven: number;
-  vsTombKings: number;
-  vsVampireCoast: number;
-  vsKislev: number;
-  vsGrandCathay: number;
-  vsKhorne: number;
-  vsNurgle: number;
-  vsSlaanesh: number;
-  vsTzeentch: number;
-  vsOgreKingdoms: number;
-  vsDaemonsOfChaos: number;
+  Empire: number;
+  Dwarfs: number;
+  VampireCounts: number;
+  Greenskins: number;
+  WarriorsOfChaos: number;
+  Bretonnia: number;
+  Beastmen: number;
+  WoodElves: number;
+  Norsca: number;
+  HighElves: number;
+  DarkElves: number;
+  Lizardmen: number;
+  Skaven: number;
+  TombKings: number;
+  VampireCoast: number;
+  Kislev: number;
+  GrandCathay: number;
+  Khorne: number;
+  Nurgle: number;
+  Slaanesh: number;
+  Tzeentch: number;
+  OgreKingdoms: number;
+  DaemonsOfChaos: number;
 }
+
+export type Faction = typeof factionList[number];

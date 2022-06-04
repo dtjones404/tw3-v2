@@ -22,4 +22,4 @@ export const factionList = [
   'Tzeentch',
   'OgreKingdoms',
   'DaemonsOfChaos',
-];
+] as const;
