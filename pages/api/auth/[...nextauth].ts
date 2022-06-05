@@ -4,10 +4,9 @@ import SequelizeAdapter from '@next-auth/sequelize-adapter';
 import { Sequelize } from 'sequelize';
 import pg from 'pg';
 
-const sequelize = new Sequelize({
+const sequelize = new Sequelize(process.env.DB_URI!, {
   dialect: 'postgres',
   dialectModule: pg,
-  database: process.env.DB_URI!,
 });
 
 sequelize.sync();
