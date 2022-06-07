@@ -14,7 +14,7 @@ import { convertToTitleCase } from '../util/convertToTitleCase';
 
 const styles = {
   container:
-    'overflow-scroll h-[50vh] w-[80vw] mx-auto shadow-xl border-2 rounded-t',
+    'overflow-scroll h-[50vh] w-full mx-auto shadow-xl border-2 rounded-t',
   table: 'block w-fit text-center rounded-t',
   thead: 'block sticky top-0 rounded-t z-10',
   tbody: 'block',
@@ -23,16 +23,17 @@ const styles = {
   rowHeader:
     'block text-center w-[150px] sticky left-0 border border-black flex-shrink-0 bg-white justify-self-start select-none cursor-pointer',
   td: 'block border border-black w-[150px] flex-shrink-0',
+  foot: 'block border border-black w-[150px] flex-shrink-0 bg-white',
 };
 
 const winrateToCellColor = [
-  [0.45, 'bg-[#f43f5e]'],
-  [0.47, 'bg-[#ea5b48]'],
-  [0.49, 'bg-[#f6ac48]'],
-  [0.51, 'bg-[#fde047]'],
-  [0.53, 'bg-[#dee240]'],
-  [0.55, 'bg-[#c0e43a]'],
-  [1, 'bg-[#a3e635]'],
+  [0.45, 'bg-[#ff7167]'],
+  [0.47, 'bg-[#ffa08c]'],
+  [0.49, 'bg-[#ffb09b]'],
+  [0.51, 'bg-[#fcf5c3]'],
+  [0.53, 'bg-[#def391]'],
+  [0.55, 'bg-[#cdf083]'],
+  [1, 'bg-[#a0e666]'],
 ];
 
 const getCellColor = (s: string) => {
@@ -200,7 +201,7 @@ export default function MatchupTable() {
                 );
               } else
                 return (
-                  <td className={styles.td} key={header.id}>
+                  <td className={styles.foot} key={header.id}>
                     {header.renderFooter()}
                   </td>
                 );

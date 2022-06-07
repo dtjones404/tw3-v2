@@ -42,11 +42,21 @@ export default function Navbar({ brand, brandIcon, links }: INavbarProps) {
           ))}
           {!session ? (
             <li>
-              <button onClick={() => signIn()}>Sign in</button>
+              <button
+                className="block py-2 px-3 border-b-4 border-transparent font-medium hover:text-blue-700 transition-colors"
+                onClick={() => signIn()}
+              >
+                Log in
+              </button>
             </li>
           ) : (
             <li>
-              <button onClick={() => signOut()}>Sign out</button>
+              <button
+                className="block py-2 px-3 border-b-4 border-transparent font-medium hover:text-blue-700 transition-colors"
+                onClick={() => signOut()}
+              >
+                Log out
+              </button>
             </li>
           )}
         </ul>
